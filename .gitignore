@@ -1,0 +1,6 @@
+venv/Scripts/
+venv/Lib/
+venv/__pycache__/start.cpython-36.pyc
+venv/pyvenv.cfg
+venv/pip-selfcheck.json
+.idea/

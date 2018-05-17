@@ -1,0 +1,85 @@
+
+username
+toolname
+usecount
+timestamp
+
+
+--------------------------------------------
+
+# event centric
+
+events
+{
+	{ timestamp: ttt, user: userIndex, tool: toolIndex, export_count: 1 }
+    { timestamp: ttt, user: userIndex, tool: toolIndex, export_count: 1 }
+    { timestamp: ttt, user: userIndex, tool: toolIndex }
+    ...
+}
+
+lists
+{
+    users: ['Anil', 'Trilok', 'haX0r', ...]
+    tools: ['saveas', 'deletemetadata', 'export', ... ]
+}
+
+--------------------------------------------
+
+
+
+--------------------------------------------
+
+# user centric
+user1
+{
+	events:
+		{
+			{ tool: toolid, timestamp: ..., count: 1 }
+			{ tool: toolid, timestamp: ..., count: 1 }
+			{ tool: toolid, timestamp: ... }
+			...
+		}
+
+}
+
+user2
+{
+	events:
+		{
+			{ tool: toolid, timestamp: ..., count: 1 }
+			{ tool: toolid, timestamp: ..., count: 1 }
+			{ tool: toolid, timestamp: ... }
+			...
+		}
+
+}
+
+----------------------------------------------
+
+
+--------------------------------------------
+# tab centric:
+
+exporter
+{
+    events
+    {
+        { count: x, timestamp: ..., userid: abc }
+        { count: x, timestamp: ..., userid: abc }
+        { count: x, timestamp: ..., userid: abc }
+        ...
+    }
+}
+
+toolbox
+{
+    events
+    {
+        { toolid: 123, timestamp: ..., userid: abc }
+        { toolid: 123, timestamp: ..., userid: abc }
+        { toolid: 123, timestamp: ..., userid: abc }
+        ...
+    }
+}
+
+--------------------------------------------
