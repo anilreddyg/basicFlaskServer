@@ -1,54 +1,54 @@
 from flask import Flask
 from flask import request
 from pymongo import MongoClient
+import datetime
 app = Flask(__name__)
 
 
+# preparing db objects
 client = MongoClient()
-db = client.ToolUsage
-psData = db.PhotoshopData
+db = client.wta_tools
+tool_events = db.tool_events
+tools = db.tools
+users = db.users
 
 
 @app.route('/')
 def index():
 	print('===============================\n')
 	print("Root page visit!")
-	# print(psData.find_one({"user":"Trilok"})['exports'])
 	print('\n===============================')
-	return "Connected to this Database: '{}'<br> and referencing the collection '{}'" .format(db.name,psData.name)
+	return "root page"
 
 
-@app.route('/export',  methods=['GET'])
-def update_export_usage_in_db():
-	print('===============================')
-	print("\n'{0}' exported '{1}' items using the export panel\n".format(request.args['user'], request.args['exportCount']))
-	user = request.args['user']
-	export_count = int(request.args['exportCount'])
-	update_usage_in_db(user, 'exports', export_count)
-	print('\n===============================')
-	return 'export tool used!'
-
-
-@app.route('/toolBox', methods=['GET'])
-def update_toolbox_usage_in_db():
-	print('===============================')
-	print("\n'{0}' used the '{1}' tool from the toolbox\n" .format(request.args['user'], request.args['toolName']))
-	user = request.args['user']
-	tool_name = request.args['toolName'].lower()
-	update_usage_in_db(user, tool_name)
-	print('\n===============================')
-	return 'tool boxing!'
-
-
+# http://185.74.13.164:5000/wooga_photoshop_tools?tool_name=exporter&user_name=Anil&export_count=45
+@app.route('/wooga_photoshop_tools', methods=['GET'])
 def update_usage_in_db(*args):
-	inc_val = 1
-	if len(args) == 3:
-		inc_val = args[2]
-	user_data = psData.find_one({"user": args[0]})
-	# if user does not exist insert document with tool usage of 1
-	if user_data is None:
-		psData.insert_one({"user": args[0], args[1]: inc_val})
-		print("Created new user: {}".format(args[0]))
+	# check if the user exists, if not add to users
+	user = users.find_one({"user_name": request.args['user_name']})
+	if user is None:
+		user_id = users.insert({"user_name": request.args['user_name']})
 	else:
-		psData.update({"_id": user_data['_id']}, {"$inc": {args[1]: inc_val}})
-		print("Updated {}'s '{}' usage count by {}".format(args[0], args[1], inc_val))
+		user_id = user['_id']
+
+	# check if tool exists, if not, add
+	tool = tools.find_one({"tool_name": request.args['tool_name']})
+	if tool is None:
+		tool_id = tools.insert({"tool_name": request.args['tool_name']})
+	else:
+		tool_id = tool['_id']
+
+	# create a tool event dict (for inserting into event collection),
+	event_dict = {
+		"timestamp": datetime.datetime.utcnow(),
+		"user_id": user_id,
+		"tool_id": tool_id,
+	}
+
+	# if tool is export tool, then also include the export count in event_data
+	if request.args['tool_name'] == "exporter":
+		event_dict['event_data'] = {"export_count": int(request.args['export_count'])}
+
+	# insert event dict into events collection in db
+	tool_events.insert_one(event_dict)
+	return "here have a return"

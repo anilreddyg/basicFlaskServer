@@ -9,21 +9,52 @@ timestamp
 
 # event centric
 
-events
-{
-	{ timestamp: ttt, user: userIndex, tool: toolIndex, export_count: 1 }
-    { timestamp: ttt, user: userIndex, tool: toolIndex, export_count: 1 }
-    { timestamp: ttt, user: userIndex, tool: toolIndex }
-    ...
-}
+photoshop_events
 
-lists
-{
-    users: ['Anil', 'Trilok', 'haX0r', ...]
-    tools: ['saveas', 'deletemetadata', 'export', ... ]
-}
+{ timestamp: ttt, user: userIndex, tool: toolIndex, event_data{} }
+{ timestamp: ttt, user: userIndex, tool: toolIndex, event_data{} }
+{ timestamp: ttt, user: userIndex, tool: toolIndex, event_data{} }
+{ timestamp: ttt, user: userIndex, tool: toolIndex, event_data{} }
+...
+
+users
+
+{_id: ..., user_name: "name" }
+{_id: ..., user_name: "name" }
+...
+
+
+tools
+
+{ _id: ..., tool_name: "toolname" }
+{ _id: ..., tool_name: "toolname" }
+...
 
 --------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
