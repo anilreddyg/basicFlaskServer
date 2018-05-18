@@ -17,32 +17,48 @@ users = db.users
 
 @app.route('/reports')
 def render_reports():
-	# store user dicts in a list
-	export_table = list()
+	# EXPORT TABLE
+	export_report = list()
 	for user in users.find():
-		export_table.append({'user_name': user['user_name']})
+		export_report.append({'user_name': user['user_name']})
 	# print(export_table)
 
 	# for each user, get the export count
 	exporter_tool_id = tools.find_one({"tool_name": "exporter"})['_id']
-	for i, export_table_row in enumerate(export_table):
+	total_exported_items = 0
+	for i, export_report_row in enumerate(export_report):
 		export_calls = 0
 		exported_items = 0
-		user_id = users.find_one({"user_name":export_table_row['user_name']})['_id']
+		user_id = users.find_one({"user_name":export_report_row['user_name']})['_id']
 		# find all export events related to the current user
 		for export_event in tool_events.find({"tool_id": ObjectId(exporter_tool_id), "user_id": ObjectId(user_id)}):
 			export_calls += 1
 			exported_items += export_event['event_data']['export_count']
-		export_table[i].update({"export_calls":export_calls, "exported_items":exported_items})
-		print("{} , {} , {}".format(export_table[i]['user_name'], export_table[i]['export_calls'], export_table[i]['exported_items']))
-	# display users, their exports and total exported items
-	# return "here have a return"
-	return render_template('reports.html', export_table=export_table)
+		total_exported_items += exported_items
+		export_report[i].update({"export_calls":export_calls, "exported_items":exported_items})
+		# print("{} , {} , {}".format(export_table[i]['user_name'], export_table[i]['export_calls'], export_table[i]['exported_items']))
+
+	# TOOLS REPORT
+	tools_report = list()
+	for tool in tools.find():
+		tools_report.append({ 'tool_name': tool['tool_name']})
+	# print(tools_report)
+
+	# for each tool in the tool report, check the tool events for usage
+	for i, tools_report_row in enumerate(tools_report):
+		tool_id = tools.find_one({"tool_name": tools_report_row['tool_name']})['_id']
+		tool_usage_count = 0
+		for tool_event in tool_events.find({"tool_id": ObjectId(tool_id)}):
+			tool_usage_count += 1
+		tools_report[i].update({"tool_usage_count":tool_usage_count})
+		# print("{} {}".format(tools_report[i]['tool_name'], tools_report[i]['tool_usage_count']))
+	return render_template('reports.html', export_table=export_report, tools_table=tools_report, total_exported_items=total_exported_items)
 
 
-# http://185.74.13.164:5000/wooga_photoshop_tools?tool_name=exporter&user_name=Anil&export_count=45
+# http://localhost:5000/wooga_photoshop_tools?tool_name=exporter&user_name=Anil&export_count=45
 @app.route('/wooga_photoshop_tools', methods=['GET'])
 def update_usage_in_db(*args):
+	print("\nRegistered tool usage!\n")
 	# check if the user exists, if not add to users
 	user = users.find_one({"user_name": request.args['user_name']})
 	if user is None:

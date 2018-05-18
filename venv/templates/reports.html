@@ -1,4 +1,58 @@
-<!--# display users, their exports and total exported items-->
-<!--# tool name: number of uses-->
-<!--# return "root page"-->
-<h3>Reports:</h3>
+{% extends "base_template.html" %}
+{% block title %}Reports!{% endblock %}
+
+{% block content %}
+<h2>Reports:</h2>
+<hr>
+<h4>Exports Report</h4>
+<table class="reports_table" border="1">
+    <tr>
+        <td>
+            User Name
+        </td>
+        <td>
+            Export Calls
+        </td>
+        <td>
+           Exported Items
+        </td>
+    </tr>
+    {% for table_row in export_table %}
+    <tr>
+        <td>
+            {{ table_row['user_name'] }}
+        </td>
+        <td>
+            {{ table_row['export_calls'] }}
+        </td>
+        <td>
+            {{ table_row['exported_items'] }}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<p>Total Exported Items: {{ total_exported_items }}</p>
+<hr>
+<h4>Tools report:</h4>
+<table class="reports_table" border="1">
+    <tr>
+        <td>
+            Detected tools
+        </td>
+        <td>
+            Tool Usage Count
+        </td>
+    </tr>
+    {% for table_row in tools_table %}
+    <tr>
+        <td>
+            {{ table_row['tool_name']}}
+        </td>
+        <td>
+            {{ table_row['tool_usage_count']}}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<hr>
+{% endblock %}
