@@ -1,5 +1,7 @@
+from bson import ObjectId
 from flask import Flask
 from flask import request
+from flask import  render_template
 from pymongo import MongoClient
 import datetime
 app = Flask(__name__)
@@ -13,12 +15,29 @@ tools = db.tools
 users = db.users
 
 
-@app.route('/')
-def index():
-	print('===============================\n')
-	print("Root page visit!")
-	print('\n===============================')
-	return "root page"
+@app.route('/reports')
+def render_reports():
+	# store user dicts in a list
+	export_table = list()
+	for user in users.find():
+		export_table.append({'user_name': user['user_name']})
+	# print(export_table)
+
+	# for each user, get the export count
+	exporter_tool_id = tools.find_one({"tool_name": "exporter"})['_id']
+	for i, export_table_row in enumerate(export_table):
+		export_calls = 0
+		exported_items = 0
+		user_id = users.find_one({"user_name":export_table_row['user_name']})['_id']
+		# find all export events related to the current user
+		for export_event in tool_events.find({"tool_id": ObjectId(exporter_tool_id), "user_id": ObjectId(user_id)}):
+			export_calls += 1
+			exported_items += export_event['event_data']['export_count']
+		export_table[i].update({"export_calls":export_calls, "exported_items":exported_items})
+		print("{} , {} , {}".format(export_table[i]['user_name'], export_table[i]['export_calls'], export_table[i]['exported_items']))
+	# display users, their exports and total exported items
+	# return "here have a return"
+	return render_template('reports.html', export_table=export_table)
 
 
 # http://185.74.13.164:5000/wooga_photoshop_tools?tool_name=exporter&user_name=Anil&export_count=45
